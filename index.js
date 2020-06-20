@@ -63,9 +63,7 @@ app.post('/api/notes', (request, response) => {
     const body = request.body
 
     if (!body.content) {
-        return response.status(400).json({
-            error: 'content missing'
-        })
+        next({error: 'content missing'})
     }
 
     const note = {
@@ -81,13 +79,11 @@ app.post('/api/notes', (request, response) => {
 })
 
 
-app.put('/api/notes/:id', (request, response) => {
+app.put('/api/notes/:id', (request, response, next) => {
     const body = request.body
 
     if (!body.id) {
-        return response.status(400).json({
-            error: 'id missing'
-        })
+        next({error: 'id missing'})
     }
 
     const note = {
@@ -106,3 +102,16 @@ const PORT = process.env.PORT || 3001
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`)
 })
+
+//Custom Middleware - Handle Errors
+const unknownEndpoint = (request, response, next) => {
+    console.log('CustomMiddleware - unknownEndpoint')
+    next('unknown endpoint')
+}
+app.use(unknownEndpoint)
+
+const errorHandler = (error, request, response, next) => {
+    console.error(error.message)
+    return response.status(400).send(error)
+}
+app.use(errorHandler)
